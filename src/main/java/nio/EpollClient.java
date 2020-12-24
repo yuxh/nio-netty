@@ -12,8 +12,8 @@ import java.nio.channels.SocketChannel;
  */
 public class EpollClient {
     public static void main(String[] args) {
-        try {
-            SocketChannel socketChannel = SocketChannel.open();
+        try (SocketChannel socketChannel = SocketChannel.open()) {
+            socketChannel.configureBlocking(false);
             socketChannel.connect(new InetSocketAddress("127.0.0.1", 8000));
 
             ByteBuffer writeBuffer = ByteBuffer.allocate(32);
@@ -31,6 +31,7 @@ public class EpollClient {
                 socketChannel.read(readBuffer);
             }
         } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 }

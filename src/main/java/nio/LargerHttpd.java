@@ -26,14 +26,22 @@ public class LargerHttpd {
             try {
                 while (clientSelector.select(100) == 0) ;
                 Set<SelectionKey> readySet = clientSelector.selectedKeys();
-                for (Iterator<SelectionKey> it = readySet.iterator();
-                     it.hasNext(); ) {
+                for (Iterator<SelectionKey> it = readySet.iterator();it.hasNext(); ) {
                     final SelectionKey key = it.next();
                     it.remove();
                     if (key.isAcceptable()) {
                         acceptClient(ssc);
                     } else {
+                        //取消所有监听
+//                         It’s important that we change the interest set to zero to clear it before
+//                        the next loop; otherwise, we’d be in a race to see whether the thread pool performed its
+//                        maximum work before we detected another ready condition. Setting the interest ops to
+//                        0 and resetting it in the HttpdConnection object upon completion ensures that only
+//                        one thread is handling a given client at a time.
+
+                        //有个误区，如果key的OP_READ已经存在，取消监听，isReadable仍然是true（因为针对的是readyOps）
                         key.interestOps(0);
+
                         executor.execute(new Runnable() {
                             public void run() {
                                 try {
@@ -53,6 +61,7 @@ public class LargerHttpd {
 
     void acceptClient(ServerSocketChannel ssc) throws IOException {
         SocketChannel clientSocket = ssc.accept();
+        System.out.println("accept success");
         clientSocket.configureBlocking(false);
         SelectionKey key = clientSocket.register(clientSelector,
                 SelectionKey.OP_READ);
@@ -61,6 +70,7 @@ public class LargerHttpd {
     }
 
     void handleClient(SelectionKey key) throws IOException {
+        System.out.println("handleClient...");
         HttpdConnection client = (HttpdConnection) key.attachment();
         if (key.isReadable()) {
             client.read(key);

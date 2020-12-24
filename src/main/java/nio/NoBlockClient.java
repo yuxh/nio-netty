@@ -21,7 +21,7 @@ public class NoBlockClient {
 
     public static void main(String[] args) throws IOException {
 
-        // 1. 获取通道. 这个 open(SocketAddress remote)实际上调用了connect,是阻塞的
+        // 1. 获取通道. 这个 open(SocketAddress remote)实际上调用了connect,是阻塞的(还未调用configureBlocking)
         //非阻塞可以这样写：SocketChannel sc = SocketChannel.open();sc.configureBlocking(false);sc.connect(remoteAddr);
         SocketChannel socketChannel = SocketChannel.open(new InetSocketAddress("127.0.0.1", 6666));
         System.out.println("连接成功");
